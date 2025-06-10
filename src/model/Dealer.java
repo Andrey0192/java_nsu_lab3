@@ -1,6 +1,6 @@
+package model;
+
 import logging.DillerLogger;
-import model.Auto;
-import model.Storage;
 import util.IdGenerator;
 
 import java.io.IOException;
@@ -12,6 +12,7 @@ public class Dealer implements Runnable {
     private final boolean logEnabled;
     private final DillerLogger dillerLogger;
     private final int dealerId;
+    private boolean running;
 
     public Dealer(Storage<Auto> autoStorage, long delay, boolean logEnabled, String filePath) {
         this.autoStorage = autoStorage;
@@ -52,4 +53,9 @@ public class Dealer implements Runnable {
             }
         }
     }
+    public void stop() {
+        running = false;
+        Thread.currentThread().interrupt();
+    }
+
 }

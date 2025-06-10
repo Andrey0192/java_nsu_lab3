@@ -5,6 +5,7 @@ import java.util.Deque;
 
 public class Storage<T> {
     private final Deque<T> storage = new ArrayDeque<>();
+
     private final int capacity;
     public Storage(int capacity) {
         this.capacity = capacity;
