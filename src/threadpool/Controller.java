@@ -3,19 +3,19 @@ package threadpool;
 import model.*;
 
 public class Controller implements Runnable {
-    Storage<Body> bodyStorage;
-    Storage<Engine> engineStorage;
-    Storage<Accessories> accessoriesStorage;
+    private final Storage<Body> bodyStorage;
+    private final Storage<Engine> engineStorage;
+    private final Storage<Accessories> accessoriesStorage;
+    private final Object controllerLock ;
 
-
-    final Storage<Auto> autoStorage;
-    ThreadPool threadPool;
+    private final Storage<Auto> autoStorage;
+    private final ThreadPool threadPool;
 
     private int lowAuto = 1;
 
 
     public Controller(Storage<Body> bodyStorage, Storage<Engine> engineStorage,
-                      Storage<Accessories> accessoriesStorage,
+                      Storage<Accessories> accessoriesStorage, Object controllerLock,
                       Storage<Auto> autoStorage, ThreadPool threadPool  , int lowAuto) {
         this.bodyStorage = bodyStorage;
         this.engineStorage = engineStorage;
@@ -23,23 +23,22 @@ public class Controller implements Runnable {
         this.autoStorage = autoStorage;
         this.threadPool = threadPool;
         this.lowAuto = lowAuto;
+        this.controllerLock = controllerLock;
 
     }
 
     @Override
     public void run() {
         try {
-            while(!Thread.interrupted()) {
-                synchronized(autoStorage){
-                    while (autoStorage.size() > lowAuto){
-                        autoStorage.wait();
-                    }
-                    int count =  autoStorage.getCapacity() - autoStorage.size();
-                    for (int i = 0; i < count; i++){
-                        threadPool.submit(new WorkerTask(bodyStorage , engineStorage ,accessoriesStorage, autoStorage));
-                    }
-                    autoStorage.wait();
+            for (int i = 0; i < lowAuto; i++) {
+                threadPool.submit(new WorkerTask(bodyStorage , engineStorage ,accessoriesStorage, autoStorage));
+            }
+
+            while(!Thread.currentThread().isInterrupted()) {
+                synchronized(controllerLock){
+                    controllerLock.wait();
                 }
+                threadPool.submit(new WorkerTask(bodyStorage , engineStorage ,accessoriesStorage, autoStorage));
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

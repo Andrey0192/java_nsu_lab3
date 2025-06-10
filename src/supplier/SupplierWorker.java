@@ -34,9 +34,9 @@ public class SupplierWorker<T> implements Runnable{
     public void run()  {
         try {
             while(!thread.isInterrupted()){
+                Thread.sleep(delay.get());
                 T item = factory.get();
                 storage.add(item);
-                Thread.sleep(delay.get());
             }
         } catch (InterruptedException e) {
             thread.interrupt();

@@ -19,23 +19,24 @@ public class Main {
 
         Storage<Auto> autoStorage = new Storage<>(config.getInt("StorageAutoSize" ,100));
 
-        SupplierWorker<Body> bodySupplierWorker = new SupplierWorker<>(bodyStorage ,Body::new, config.getInt("BodyDelay" ,100));
+        SupplierWorker<Body> bodySupplierWorker = new SupplierWorker<>(bodyStorage ,Body::new, config.getInt("BodySupplyDelay" ,100));
 
         SupplierWorker<Engine> engineSupplierWorker = new SupplierWorker<>(engineStorage,Engine::new, config.getInt("EngineDelay" ,100));
 
         List<SupplierWorker<Accessories>> accessoriesSupplierWorkers = new ArrayList<>();
 
         for (int i = 0; i < config.getInt("AccessoriesSuppliers", 10); i++) {
-            SupplierWorker<Accessories> accessoriesSupplierWorker = new SupplierWorker<>(accessoriesStorage,Accessories::new, config.getInt("AccessoriesSuppliers", i));
+            SupplierWorker<Accessories> accessoriesSupplierWorker = new SupplierWorker<>(accessoriesStorage,Accessories::new, config.getInt("AccessoriesDelay", i));
             accessoriesSupplierWorkers.add(accessoriesSupplierWorker);
         }
 
+        Object controllerLock = new Object();
 
         ThreadPool threadPool = new ThreadPool(config.getInt("Workers" ,100));
 
         Thread controller =new Thread(
         new Controller(bodyStorage,engineStorage,
-                accessoriesStorage,autoStorage,threadPool, config.getInt("LowAuto" ,50)) ,
+                        accessoriesStorage, controllerLock, autoStorage, threadPool, config.getInt("LowAuto" ,50)),
                 "controller"
         );
         controller.start();
@@ -47,8 +48,8 @@ public class Main {
             Dealer dealer = new Dealer(
                     autoStorage ,
                     config.getInt("DealersDelay" ,100) ,
-                    true,
-                    "./sales.log");
+                    config.getBoolean("LogSale", true), "./sales.log",
+                    controllerLock);
             dealers.add(dealer);
             new Thread(dealer ,"dealer № "+i+1).start();
         }
@@ -69,23 +70,8 @@ public class Main {
             bodySupplierWorker.stop();
             engineSupplierWorker.stop();
             accessoriesSupplierWorkers.forEach(SupplierWorker::stop);
-
-            controller.interrupt();
-
             dealers.forEach(Dealer::stop);
-
             threadPool.shutdown();
-
-            try {
-                bodySupplierWorker.getThread().join();
-                engineSupplierWorker.getThread().join();
-                for (SupplierWorker<Accessories> t : accessoriesSupplierWorkers) {
-                    t.stop();
-                }
-                controller.join();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
 
         }));
 

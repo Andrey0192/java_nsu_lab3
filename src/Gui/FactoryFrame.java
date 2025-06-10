@@ -28,6 +28,7 @@ public class FactoryFrame extends JFrame {
     private final JLabel lblEngineStorage       = new JLabel();
     private final JLabel lblAccessoriesStorage  = new JLabel();
     private final JLabel lblAutoStorage         = new JLabel();
+    private final JLabel lblQueueSize         = new JLabel();
 //    private final JLabel lblAutoProduced        = new JLabel();
 //    private final JLabel lblBodyProduced        = new JLabel();
 //    private final JLabel lblEngineProduced      = new JLabel();
@@ -66,9 +67,9 @@ public class FactoryFrame extends JFrame {
         JPanel controls = new JPanel(new GridLayout(4,2,5,10));
 
         JSlider bodySlider = new JSlider(0, 2000, (int)config.getInt("BodySupplyDelay" ,50));
-        JSlider engineSlider = new JSlider(0, 2000, (int)config.getInt("BodySupplyDelay" ,50));
-        JSlider accessoriesSlider = new JSlider(0, 2000, (int)config.getInt("BodySupplyDelay" ,50));
-        JSlider dealerSlider = new JSlider(0, 2000, (int)config.getInt("BodySupplyDelay" ,50));
+        JSlider engineSlider = new JSlider(0, 2000, (int)config.getInt("MotorSupplyDelay" ,50));
+        JSlider accessoriesSlider = new JSlider(0, 2000, (int)config.getInt("AccessorySupplyDelay" ,50));
+        JSlider dealerSlider = new JSlider(0, 2000, (int)config.getInt("DealerDelay" ,50));
 
 
         controls.setBorder(BorderFactory.createTitledBorder("Delays (ms)"));
@@ -76,6 +77,7 @@ public class FactoryFrame extends JFrame {
         controls.add(new JLabel("Body engineSlider "));         controls.add(engineSlider);
         controls.add(new JLabel("Body accessoriesSlider "));    controls.add(accessoriesSlider);
         controls.add(new JLabel("Body dealerSlider "));         controls.add(dealerSlider);
+
 
 
 
@@ -104,6 +106,7 @@ public class FactoryFrame extends JFrame {
         status.add(lblEngineStorage);
         status.add(lblAccessoriesStorage);
         status.add(lblAutoStorage);
+        status.add(lblQueueSize);
 
 
         add(status, BorderLayout.CENTER);
@@ -133,6 +136,9 @@ public class FactoryFrame extends JFrame {
                     accessoriesStorage.size() + " / " + accessoriesStorage.getCapacity() );
             lblAutoStorage.setText("Auto in storage: " +
                     autoStorage.size() + " / " + autoStorage.getCapacity() );
+            lblQueueSize.setText("Queue tasks: " +
+                    threadPool.queueSize()
+            );
 
 
         };
