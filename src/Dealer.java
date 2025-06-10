@@ -1,6 +1,7 @@
 import logging.DillerLogger;
 import model.Auto;
 import model.Storage;
+import util.IdGenerator;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
@@ -10,13 +11,13 @@ public class Dealer implements Runnable {
     private final AtomicLong delay;
     private final boolean logEnabled;
     private final DillerLogger dillerLogger;
-    private final String filePath;
+    private final int dealerId;
 
     public Dealer(Storage<Auto> autoStorage, long delay, boolean logEnabled, String filePath) {
         this.autoStorage = autoStorage;
         this.delay       = new AtomicLong(delay);
         this.logEnabled = logEnabled;
-        this.filePath = filePath;
+        dealerId = IdGenerator.getId();
         try {
             this.dillerLogger = new DillerLogger("DillerLogger" , filePath);
         } catch (IOException e) {
@@ -36,15 +37,19 @@ public class Dealer implements Runnable {
     @Override
     public void run() {
         try {
-            Auto auto = autoStorage.take();
-            if (logEnabled) {
-
-                dillerLogger.log(auto , DillerLogger.Level.INFO , "execute...");
+            while (!Thread.currentThread().isInterrupted()) {
+                Auto auto = autoStorage.take();
+                if (logEnabled) {
+                    dillerLogger.log(auto , DillerLogger.Level.INFO , "execute: " +  dealerId );
+                }
+                Thread.sleep(delay.get());
             }
-            Thread.sleep(delay.get());
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            return;
+        } finally {
+            if (logEnabled) {
+                dillerLogger.close();
+            }
         }
-
     }
 }

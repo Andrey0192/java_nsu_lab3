@@ -15,8 +15,8 @@ public class SupplierWorker<T> implements Runnable{
         this.storage  = storage;
         this.factory = factory;
         this.delay    = new AtomicLong(delay);
-        this.thread   = new Thread(this,"StorageWorker" + storage.getClass().getSimpleName() );
-        this.thread.start();
+        this.thread   = new Thread(this,"SupplierWorker: " + storage.getClass().getSimpleName() );
+        thread.start();
     }
 
     public void setDelay(long newDelay) {
@@ -35,7 +35,15 @@ public class SupplierWorker<T> implements Runnable{
                 Thread.sleep(delay.get());
             }
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            thread.interrupt();
         }
+    }
+
+    public void stop() {
+        thread.interrupt();
+    }
+
+    public Thread getThread() {
+        return thread;
     }
 }

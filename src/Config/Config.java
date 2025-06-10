@@ -7,10 +7,12 @@ import java.util.Properties;
 
 public class Config {
     private final Properties config;
+    public static final String CONFIG_FILE = "factory.properties";
+
 
      public Config() {
         config = new Properties();
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream("factory.properties")) {
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(CONFIG_FILE)) {
            if (is != null) {
                config.load(is);
            } else {
@@ -21,11 +23,20 @@ public class Config {
         }
     }
 
-    int getInt(String key, int defaultValue){
-        return Integer.parseInt(config.getProperty(key));
+    public int getInt(String key, int defaultValue){
+         String value =  config.getProperty(key);
+         if(value != null){
+             return Integer.parseInt(value);
+
+         }
+         return defaultValue;
     }
 
-    boolean getBoolean(String key, boolean defaultValue){
-        return Boolean.parseBoolean(config.getProperty(key));
-    }
+    public boolean getBoolean(String key, boolean defaultValue){
+        String value =  config.getProperty(key);
+        if(value != null){
+            return Boolean.parseBoolean(value);
+
+        }
+        return defaultValue;    }
 }

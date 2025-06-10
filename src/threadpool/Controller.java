@@ -34,10 +34,11 @@ public class Controller implements Runnable {
                     while (autoStorage.size() > lowAuto){
                         autoStorage.wait();
                     }
-                }
-                int count =  lowAuto - autoStorage.size();
-                for (int i = 0; i < count; i++){
-                    threadPool.submit(new WorkerTask(bodyStorage , engineStorage ,accessoriesStorage, autoStorage));
+                    int count =  autoStorage.getCapacity() - autoStorage.size();
+                    for (int i = 0; i < count; i++){
+                        threadPool.submit(new WorkerTask(bodyStorage , engineStorage ,accessoriesStorage, autoStorage));
+                    }
+                    autoStorage.wait();
                 }
             }
         } catch (InterruptedException e) {

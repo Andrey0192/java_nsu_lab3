@@ -10,26 +10,17 @@ public class Storage<T> {
         this.capacity = capacity;
     }
 
-    public synchronized void add(T t) {
+    public synchronized void add(T t) throws InterruptedException {
         while (storage.size() == capacity) {
-            try {
                 wait();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
         }
         storage.addLast(t);
         notifyAll();
     }
 
-    public synchronized T take(){
+    public synchronized T take() throws InterruptedException{
         while(storage.isEmpty()){
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-
+            wait();
         }
         T t = storage.removeFirst();
         notifyAll();

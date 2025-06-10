@@ -22,11 +22,17 @@ public class WorkerTask implements Task{
 
     @Override
     public void run() {
-        Body body = bodyStorage.take();
-        Engine engine = engineStorage.take();
-        Accessories accessories = accessoriesStorage.take();
+        try {
+            Body body = null;
+            body = bodyStorage.take();
+            Engine engine = engineStorage.take();
+            Accessories accessories = accessoriesStorage.take();
 
-        Auto auto = new Auto(body, engine, accessories);
-        autoStorage.add(auto);
+            Auto auto = new Auto(body, engine, accessories);
+            autoStorage.add(auto);
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

@@ -22,7 +22,7 @@ public class DillerLogger  {
 
     public void log(Auto auto , Level level , String message) {
         String date = LocalDateTime.now().toString();
-        String line ="DillerLogger: " +  date +  " " + auto.toString() + " " + level + " " + message;
+        String line ="DillerLogger: " +  date +  " " + auto.toString() + " " + level + " " + message +"\n";
         try {
             writer.write(line);
 
@@ -31,7 +31,7 @@ public class DillerLogger  {
         }
 
     }
-    void close() {
+    public void close() {
         try {
             writer.close();
         } catch (IOException e) {
