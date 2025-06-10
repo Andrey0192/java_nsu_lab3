@@ -20,13 +20,14 @@ public class Main {
         Storage<Auto> autoStorage = new Storage<>(config.getInt("StorageAutoSize" ,100));
 
         SupplierWorker<Body> bodySupplierWorker = new SupplierWorker<>(bodyStorage ,Body::new, config.getInt("BodySupplyDelay" ,100));
-
         SupplierWorker<Engine> engineSupplierWorker = new SupplierWorker<>(engineStorage,Engine::new, config.getInt("EngineDelay" ,100));
 
         List<SupplierWorker<Accessories>> accessoriesSupplierWorkers = new ArrayList<>();
-
         for (int i = 0; i < config.getInt("AccessoriesSuppliers", 10); i++) {
-            SupplierWorker<Accessories> accessoriesSupplierWorker = new SupplierWorker<>(accessoriesStorage,Accessories::new, config.getInt("AccessoriesDelay", i));
+            SupplierWorker<Accessories> accessoriesSupplierWorker = new SupplierWorker<>(
+                    accessoriesStorage,Accessories::new,
+                    config.getInt("AccessoriesDelay", 100)
+            );
             accessoriesSupplierWorkers.add(accessoriesSupplierWorker);
         }
 
@@ -42,7 +43,6 @@ public class Main {
         controller.start();
 
         List<Dealer> dealers = new ArrayList<>();
-
 
         for (int i = 0; i < config.getInt("Dealers",10); i++) {
             Dealer dealer = new Dealer(
@@ -65,7 +65,6 @@ public class Main {
                         ).setVisible(true)
         );
 
-
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             bodySupplierWorker.stop();
             engineSupplierWorker.stop();
@@ -74,16 +73,6 @@ public class Main {
             threadPool.shutdown();
 
         }));
-
-
-//        SwingUtilities.invokeLater(() -> {
-//        });
-
-
-
-
-
-
 
     }
 }

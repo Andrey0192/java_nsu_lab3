@@ -14,6 +14,7 @@ public class Dealer implements Runnable {
     private final int dealerId;
     private boolean running = true;
     private final Object controllerLock;
+    private final AtomicLong sellAuto = new AtomicLong();
 
     public Dealer(Storage<Auto> autoStorage, long delay, boolean logEnabled, String filePath, Object controllerLock) {
         this.autoStorage = autoStorage;
@@ -44,7 +45,7 @@ public class Dealer implements Runnable {
                 Thread.sleep(delay.get());
 
                 Auto auto = autoStorage.take();
-
+                sellAuto.incrementAndGet();
                 if (logEnabled) {
                     dillerLogger.log(auto , DillerLogger.Level.INFO , "execute: " +  dealerId );
                 }
@@ -63,6 +64,9 @@ public class Dealer implements Runnable {
     public void stop() {
         running = false;
         Thread.currentThread().interrupt();
+    }
+    public long getSellAuto() {
+        return sellAuto.get();
     }
 
 }

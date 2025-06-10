@@ -28,11 +28,11 @@ public class FactoryFrame extends JFrame {
     private final JLabel lblEngineStorage       = new JLabel();
     private final JLabel lblAccessoriesStorage  = new JLabel();
     private final JLabel lblAutoStorage         = new JLabel();
-    private final JLabel lblQueueSize         = new JLabel();
-//    private final JLabel lblAutoProduced        = new JLabel();
-//    private final JLabel lblBodyProduced        = new JLabel();
-//    private final JLabel lblEngineProduced      = new JLabel();
-//    private final JLabel lblAccessoriesProduced = new JLabel();
+    private final JLabel lblQueueSize           = new JLabel();
+    private final JLabel lblBodyProduced        = new JLabel();
+    private final JLabel lblEngineProduced      = new JLabel();
+    private final JLabel lblAccessoriesProduced = new JLabel();
+    private final JLabel lblAutoProduced        = new JLabel();
 
     private final ThreadPool threadPool;
     private final List<Dealer> dealers;
@@ -107,7 +107,10 @@ public class FactoryFrame extends JFrame {
         status.add(lblAccessoriesStorage);
         status.add(lblAutoStorage);
         status.add(lblQueueSize);
-
+        status.add(lblAutoProduced);
+        status.add(lblBodyProduced);
+        status.add(lblEngineProduced);
+        status.add(lblAccessoriesProduced);
 
         add(status, BorderLayout.CENTER);
 
@@ -127,6 +130,10 @@ public class FactoryFrame extends JFrame {
     }
 
         private void updateStats() {
+            long sum=0;
+            for (int i = 0; i < accessoriesWorkers.size(); i++) {
+                sum += accessoriesWorkers.get(i).getProduced();
+            }
 
             lblBodyStorage.setText("Bodies in storage: " +
                     bodyStorage.size() + " / " + bodyStorage.getCapacity() );
@@ -138,6 +145,22 @@ public class FactoryFrame extends JFrame {
                     autoStorage.size() + " / " + autoStorage.getCapacity() );
             lblQueueSize.setText("Queue tasks: " +
                     threadPool.queueSize()
+            );
+            lblBodyProduced.setText("Body Produced: " +
+                    bodyWorker.getProduced()
+            );
+            lblEngineProduced.setText("Engine Produced: " +
+                    engineWorker.getProduced()
+            );
+            lblAccessoriesProduced.setText("Accessories Produced: " +
+                    sum
+            );
+            long sell =0;
+            for (Dealer dealer : dealers) {
+                sell += dealer.getSellAuto();
+            }
+            lblBodyProduced.setText("Auto Sell: " +
+                    sell
             );
 
 
