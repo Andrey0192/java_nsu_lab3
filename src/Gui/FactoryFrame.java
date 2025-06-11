@@ -3,6 +3,7 @@ package Gui;
 import Config.Config;
 import model.*;
 import supplier.SupplierWorker;
+import threadpool.Controller;
 import threadpool.ThreadPool;
 
 import javax.swing.*;
@@ -21,6 +22,7 @@ public class FactoryFrame extends JFrame {
     private final SupplierWorker<Body> bodyWorker;
     private final SupplierWorker<Engine> engineWorker;
     private final List<SupplierWorker<Accessories>> accessoriesWorkers;
+    private final Controller controller;
 
 
 
@@ -33,6 +35,7 @@ public class FactoryFrame extends JFrame {
     private final JLabel lblEngineProduced      = new JLabel();
     private final JLabel lblAccessoriesProduced = new JLabel();
     private final JLabel lblAutoProduced        = new JLabel();
+    private final JLabel lblDealersSell        = new JLabel();
 
     private final ThreadPool threadPool;
     private final List<Dealer> dealers;
@@ -41,7 +44,7 @@ public class FactoryFrame extends JFrame {
                         SupplierWorker<Body> bodyWorker , Storage<Body> bodyStorage,
                         SupplierWorker<Engine> engineWorker , Storage<Engine> engineStorage,
                         List<SupplierWorker<Accessories>> accessoriesWorkers, Storage<Accessories> accessoriesStorage,
-                        Storage<Auto> autoStorage,
+                        Controller controller, Storage<Auto> autoStorage,
                         ThreadPool threadPool, List<Dealer> dealers) {
 
         super("Factory");
@@ -54,6 +57,7 @@ public class FactoryFrame extends JFrame {
         this.bodyWorker = bodyWorker;
         this.engineWorker = engineWorker;
         this.accessoriesWorkers = accessoriesWorkers;
+        this.controller =controller;
 
         this.threadPool = threadPool;
         this.dealers = dealers;
@@ -74,9 +78,9 @@ public class FactoryFrame extends JFrame {
 
         controls.setBorder(BorderFactory.createTitledBorder("Delays (ms)"));
         controls.add(new JLabel("Body supplier "));             controls.add(bodySlider);
-        controls.add(new JLabel("Body engineSlider "));         controls.add(engineSlider);
-        controls.add(new JLabel("Body accessoriesSlider "));    controls.add(accessoriesSlider);
-        controls.add(new JLabel("Body dealerSlider "));         controls.add(dealerSlider);
+        controls.add(new JLabel("Engine Slider "));         controls.add(engineSlider);
+        controls.add(new JLabel("Accessories Slider "));    controls.add(accessoriesSlider);
+        controls.add(new JLabel("Dealer Slider "));         controls.add(dealerSlider);
 
 
 
@@ -111,6 +115,7 @@ public class FactoryFrame extends JFrame {
         status.add(lblBodyProduced);
         status.add(lblEngineProduced);
         status.add(lblAccessoriesProduced);
+        status.add(lblDealersSell);
 
         add(status, BorderLayout.CENTER);
 
@@ -159,8 +164,11 @@ public class FactoryFrame extends JFrame {
             for (Dealer dealer : dealers) {
                 sell += dealer.getSellAuto();
             }
-            lblBodyProduced.setText("Auto Sell: " +
+            lblDealersSell.setText("Auto Sell: " +
                     sell
+            );
+            lblAutoProduced.setText("Auto Produced: " +
+                    controller.getProducedCounter()
             );
 
 

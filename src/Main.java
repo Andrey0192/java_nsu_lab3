@@ -20,8 +20,9 @@ public class Main {
         Storage<Auto> autoStorage = new Storage<>(config.getInt("StorageAutoSize" ,100));
 
         SupplierWorker<Body> bodySupplierWorker = new SupplierWorker<>(bodyStorage ,Body::new, config.getInt("BodySupplyDelay" ,100));
+        bodySupplierWorker.start();
         SupplierWorker<Engine> engineSupplierWorker = new SupplierWorker<>(engineStorage,Engine::new, config.getInt("EngineDelay" ,100));
-
+        engineSupplierWorker.start();
         List<SupplierWorker<Accessories>> accessoriesSupplierWorkers = new ArrayList<>();
         for (int i = 0; i < config.getInt("AccessoriesSuppliers", 10); i++) {
             SupplierWorker<Accessories> accessoriesSupplierWorker = new SupplierWorker<>(
@@ -29,18 +30,22 @@ public class Main {
                     config.getInt("AccessoriesDelay", 100)
             );
             accessoriesSupplierWorkers.add(accessoriesSupplierWorker);
+            accessoriesSupplierWorker.start();
         }
 
+        //Для связи потока контроллера и диллеров
         Object controllerLock = new Object();
 
         ThreadPool threadPool = new ThreadPool(config.getInt("Workers" ,100));
 
-        Thread controller =new Thread(
-        new Controller(bodyStorage,engineStorage,
-                        accessoriesStorage, controllerLock, autoStorage, threadPool, config.getInt("LowAuto" ,50)),
-                "controller"
+        Controller controller = new Controller(bodyStorage, engineStorage,
+                accessoriesStorage, controllerLock,
+                autoStorage, threadPool,
+                config.getInt("minCountAutoInStorage", 50));
+
+        Thread thread =new Thread(controller ,"controller"
         );
-        controller.start();
+        thread.start();
 
         List<Dealer> dealers = new ArrayList<>();
 
@@ -54,13 +59,13 @@ public class Main {
             new Thread(dealer ,"dealer № "+i+1).start();
         }
 
-        SwingUtilities.invokeLater(() ->
 
+        SwingUtilities.invokeLater(() ->
          new FactoryFrame(config,
                  bodySupplierWorker,bodyStorage,
                  engineSupplierWorker,engineStorage,
                  accessoriesSupplierWorkers,accessoriesStorage,
-                 autoStorage,
+                 controller, autoStorage,
                  threadPool,dealers
                         ).setVisible(true)
         );

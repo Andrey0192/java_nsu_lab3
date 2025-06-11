@@ -12,15 +12,19 @@ public class SupplierWorker<T> implements Runnable{
     private final Supplier<T> factory;
     private AtomicLong delay;
     private final Thread thread;
-    private final AtomicLong produced = new AtomicLong();
+    private final AtomicLong produced ;
 
     private final int id;
     public SupplierWorker(Storage<T> storage, Supplier<T> factory, long delay) {
         this.storage  = storage;
         this.factory  = factory;
         id            = IdGenerator.getId();
+        produced      = new AtomicLong();
         this.delay    = new AtomicLong(delay);
         this.thread   = new Thread(this,"SupplierWorker № "+ id +" : " + storage.getClass().getSimpleName() );
+    }
+
+    public void start(){
         thread.start();
     }
 
@@ -34,14 +38,14 @@ public class SupplierWorker<T> implements Runnable{
 
     public void run()  {
         try {
+//            thread.start(); //так можно делать?
             while(!thread.isInterrupted()){
                 Thread.sleep(delay.get());
                 T item = factory.get();
-                produced.incrementAndGet();
                 storage.add(item);
+                produced.incrementAndGet();
             }
-        } catch (InterruptedException e) {
-            thread.interrupt();
+        } catch (InterruptedException _) {
         }
     }
 
@@ -56,4 +60,5 @@ public class SupplierWorker<T> implements Runnable{
     public Thread getThread() {
         return thread;
     }
+
 }

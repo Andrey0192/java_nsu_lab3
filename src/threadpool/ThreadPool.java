@@ -6,36 +6,15 @@ import java.util.Deque;
 import java.util.List;
 
 public class ThreadPool {
-    private  final Deque<Task> tasks = new ArrayDeque<Task>();
-    private  final List<Thread> threads;
+    private  final Deque<Task> tasks = new ArrayDeque<>();
+    private  final List<Thread> workers = new ArrayList<>();
     private volatile boolean running = true;
 
     public ThreadPool(int nWorkers) {
-        running = true;
-        threads = new ArrayList<Thread>();
         for (int i = 0; i < nWorkers; i++) {
-            Thread worker = new Thread(() -> {
-                while(true) {
-                    Task task;
-                    synchronized (tasks) {
-                        while (tasks.isEmpty() && running) {
-                            try {
-                                tasks.wait();
-                            } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                                break;
-                            }
-                        }
-                        if (!running && tasks.isEmpty()) {
-                            break;
-                        }
-                        task = tasks.removeFirst();
-                    }
-                    task.run();
-                }
-            });
+            Thread worker = new Thread(this::taskLoop , "worker" + i + " from " + nWorkers  + " .\n");
+            workers.add(worker);
             worker.start();
-            threads.add(worker);
         }
     }
 
@@ -47,6 +26,33 @@ public class ThreadPool {
     }
 
 
+    private void taskLoop(){
+        try {
+            while (true) {
+                Task task;
+                synchronized (tasks) {
+                    while (tasks.isEmpty() && running) {
+                        try {
+                            tasks.wait();
+                        } catch (InterruptedException _) {
+                        }
+                    }
+                    if (!running && tasks.isEmpty()) {
+                        break;
+                    }
+                    task = tasks.removeFirst();
+                }
+                try {
+                    task.run();
+                } catch (Exception e) {
+                    e.printStackTrace(System.err);
+                }
+            }
+        } finally {
+            System.out.println("Thread " + Thread.currentThread().getName() + " is ended.");
+        }
+
+    }
 
     public  int queueSize(){
         synchronized(tasks) {
@@ -54,18 +60,22 @@ public class ThreadPool {
         }
     }
 
-    public  void shutdown() {
+    public void shutDownNow(){
         running = false;
         synchronized(tasks) {
             tasks.notifyAll();
         }
-        for (Thread thread : threads) {
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
+        // если workers выполняли run()
+        workers.forEach(Thread::interrupt);
+
+    }
+
+
+    //Ждем завершения workers run()
+    public  void shutdown() {
+        running = false;
+        synchronized(tasks) {
+            tasks.notifyAll();
         }
     }
 }

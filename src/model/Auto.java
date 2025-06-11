@@ -8,6 +8,7 @@ public class Auto  {
     private final Engine engine;
     private final Accessories accessories;
 
+
     public Auto(Body body, Engine engine, Accessories accessories) {
         this.body = body;
         this.engine = engine;

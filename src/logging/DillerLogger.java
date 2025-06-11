@@ -8,7 +8,7 @@ import java.io.Writer;
 import java.time.LocalDateTime;
 
 
-public class DillerLogger  {
+public class DillerLogger  implements AutoCloseable {
     public enum Level { DEBUG, INFO, WARN, ERROR }
 
     private final String name;
@@ -31,6 +31,7 @@ public class DillerLogger  {
         }
 
     }
+    @Override
     public void close() {
         try {
             writer.close();
